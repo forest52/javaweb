@@ -8,25 +8,50 @@ import java.sql.Statement;
 
 public class DBUtil {
     // 定义数据库的连接信息
-    private static final String DRIVER = "com.mysql.jdbc.Driver";
-    private static final String URL = "jdbc:mysql://localhost:3306/xiton";
+    private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
+    private static final String URL = "jdbc:mysql://localhost:3306/test";
     private static final String USER = "root";
     private static final String PASSWORD = "1234567";
 
-    // 加载驱动
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/test", "root", "1234567");
+    }
+
+    public static void close(Connection conn, Statement stmt, ResultSet rs) {
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException var6) {
+                var6.printStackTrace();
+            }
+        }
+
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (SQLException var5) {
+                var5.printStackTrace();
+            }
+        }
+
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException var4) {
+                var4.printStackTrace();
+            }
+        }
+
+    }
+
     static {
         try {
-            Class.forName(DRIVER);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException var1) {
+            var1.printStackTrace();
         }
-    }
 
-    // 获取数据库连接
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
     }
-
     // 关闭资源
     public static void closeAll(ResultSet rs, Statement st, Connection conn) {
         try {

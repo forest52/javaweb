@@ -50,13 +50,19 @@ public class UserDao {
             // 获取数据库连接
             conn = DBUtil.getConnection();
             // 定义sql语句
-            String sql = "insert into tb_user(username, password) values(?, ?)";
-            // 预编译sql语句
+            // 定义插入语句
+            String sql = "insert into profile(username,password,sex,email,phone,address) values(?,?,?,?,?,?)";
+// 创建预编译语句
             ps = conn.prepareStatement(sql);
-            // 设置参数
+// 设置参数
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPassword());
-            // 执行更新
+            ps.setString(3, user.getSex());
+            ps.setString(4, user.getEmail());
+            ps.setString(5, user.getPhone());
+            ps.setString(6, user.getAddress());
+// 执行插入
+
             int rows = ps.executeUpdate();
             // 判断影响的行数是否大于0
             if (rows > 0) {

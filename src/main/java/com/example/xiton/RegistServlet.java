@@ -21,10 +21,16 @@ public class RegistServlet extends HttpServlet {
         request.setCharacterEncoding("utf-8");
         response.setContentType("text/html;charset=utf-8");
         // 获取请求参数
+// 获取请求参数
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        // 创建用户对象
-        User user = new User(username, password);
+        String sex = request.getParameter("sex");
+        String email = request.getParameter("email");
+        String phone = request.getParameter("phone");
+        String address = request.getParameter("address");
+// 创建用户对象
+        User user = new User(username, password, sex, email, phone, address);
+
         // 创建数据访问对象
         UserDao userDao = new UserDao();
         // 调用添加方法
@@ -32,7 +38,7 @@ public class RegistServlet extends HttpServlet {
         // 判断标志是否为true
         if (flag) {
             // 注册成功，跳转到登录页面
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("login.html");
         } else {
             // 注册失败，跳转到错误页面
             request.setAttribute("msg", "注册失败");
