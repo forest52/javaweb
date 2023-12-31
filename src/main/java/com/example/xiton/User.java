@@ -15,8 +15,7 @@ public class User implements Serializable {
     private String address; // 地址
 
     // 定义无参构造方法
-    public User() {
-    }
+
 
     // 定义有参构造方法
     public User(String username, String password, String sex, String email, String phone, String address) {
@@ -27,6 +26,13 @@ public class User implements Serializable {
         this.phone = phone;
         this.address = address;
     }
+
+    public User() {
+
+    }
+
+
+
 
     // 定义getters和setters方法
     public String getUsername() {

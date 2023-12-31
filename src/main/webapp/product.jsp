@@ -36,6 +36,6 @@
     </c:forEach>
 </table>
 <a href="cart.jsp">查看购物车</a>
-<th><a href="profile.jsp">个人信息</a></th>
+<th><a href="profileServlet">个人信息</a></th>
 </body>
 </html>

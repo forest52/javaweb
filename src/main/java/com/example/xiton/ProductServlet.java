@@ -28,6 +28,41 @@ public class ProductServlet extends HttpServlet {
 
     // 处理GET请求，根据不同的action参数，执行不同的操作
     @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        // 获取action参数，如果为空，默认为browse
+        String action = req.getParameter("action");
+        if (action == null) {
+            action = "browse";
+        }
+        switch (action) {
+            case "browse":
+                // 浏览商品，将商品列表存入请求属性中，然后转发到商品页面
+                System.out.println(products);
+                req.setAttribute("products", products);
+                req.getRequestDispatcher("product.jsp").forward(req, resp);
+                break;
+            case "buy":
+                // 购买商品，获取商品编号，然后将商品添加到购物车中，最后重定向到购物车页面
+                int id = Integer.parseInt(req.getParameter("id"));
+                Product product = findProductById(id); // 根据编号查找商品
+                if (product != null) {
+                    addToCart(req, product); // 将商品添加到购物车
+                }
+                resp.sendRedirect("cart.jsp");
+                break;
+            case "delete": // 新增的case语句，用于处理删除商品的action参数
+                // 删除商品，获取商品编号，然后从购物车中移除该商品，最后重定向到购物车页面
+                int id1 = Integer.parseInt(req.getParameter("id"));
+                removeFromCart(req, id1); // 从购物车中移除指定的商品
+                resp.sendRedirect("cart.jsp");
+                break;
+            default:
+                // 无效的action参数，返回错误信息
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action: " + action);
+        }
+
+    }
+
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         // 获取action参数，如果为空，默认为browse
         String action = req.getParameter("action");

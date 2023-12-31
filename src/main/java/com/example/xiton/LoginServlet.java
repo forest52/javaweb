@@ -51,7 +51,7 @@ public class LoginServlet extends HttpServlet {
                 cookie.setPath("/"); // 根目录
                 // 将cookie添加到响应中
                 response.addCookie(cookie);
-                request.getRequestDispatcher("product.jsp").forward(request, response);
+                request.getRequestDispatcher("/product").forward(request, response);
             } else {
                 // 密码错误，跳转到错误页面
                 request.setAttribute("msg", "密码错误");

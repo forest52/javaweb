@@ -3,7 +3,6 @@ package com.example.xiton;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class UserDao {
     // 根据用户名查询用户
@@ -16,7 +15,7 @@ public class UserDao {
             // 获取数据库连接
             conn = DBUtil.getConnection();
             // 定义sql语句
-            String sql = "select * from tb_user where username = ?";
+            String sql = "select * from profile where username = ?";
             // 预编译sql语句
             ps = conn.prepareStatement(sql);
             // 设置参数

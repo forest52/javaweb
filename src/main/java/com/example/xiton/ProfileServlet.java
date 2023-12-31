@@ -1,160 +1,89 @@
 package com.example.xiton;
 
 // 导入输入输出流类
-import java.io.*;
-// 导入数据库连接类
-import java.sql.*;
-// 导入servlet类
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-// 定义一个名为ProfileServlet的类，继承HttpServlet类
+// 一个类来封装个人信息的属性和方法
+
+
+// 一个类来显示个人信息的Servlet
+@WebServlet(name = "profileServlet", urlPatterns = "/profileServlet")
 public class ProfileServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // 定义数据库的URL，用户名和密码
 
-    // 定义数据库连接字符串
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/test?user=root&password=1234567";
 
-    // 定义数据库查询语句
-    private static final String SELECT_QUERY = "SELECT * FROM profile WHERE id = ?";
-    private static final String UPDATE_QUERY = "UPDATE profile SET name = ?, email = ?, phone = ?, address = ? WHERE id = ?";
-
-    // 重写doGet方法，用于处理GET请求
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // 设置编码
-        request.setCharacterEncoding("utf-8");
-        // 声明一个变量用于存储username
-        String username = null;
-        // 获取请求中的所有cookie
-        Cookie[] cookies = request.getCookies();
-        // 判断是否有cookie
-        if (cookies != null) {
-            // 遍历所有cookie
-            for (Cookie cookie : cookies) {
-                // 判断是否是username的cookie
-                if ("username".equals(cookie.getName())) {
-                    // 获取cookie的值
-                    username = cookie.getValue();
-                    // 跳出循环
-                    break;
-                }
-            }
-        }
-        // 判断是否获取到username
-        if (username != null) {
-            // 从cookie中获取到username，继续后续的操作
-            // 调用UserService的findUserByUsername方法，传入username，返回User对象
-            UserService userService = new UserService();
-            User user = userService.findUserByUsername(username);
-            // 判断是否找到用户
-            if (user != null) {
-                System.out.println(user);
-                // 找到用户，设置个人信息的属性
-                request.setAttribute("username", user.getUsername());
-                request.setAttribute("password", user.getPassword());
-                request.setAttribute("sex", user.getSex());
-                request.setAttribute("email", user.getEmail());
-                request.setAttribute("phone", user.getPhone());
-                request.setAttribute("address", user.getAddress());
-            } else {
-                // 没有找到用户，设置message属性为"用户不存在"
-                request.setAttribute("message", "用户不存在");
-            }
-            // 转发到profile.jsp页面
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
-        } else {
-            // 没有从cookie中获取到username，跳转到登录页面
-            response.sendRedirect("login.jsp");
-        }
-    }
-
-    // 重写doPost方法，用于处理POST请求
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // 获取session对象
-        HttpSession session = request.getSession();
-
-        // 从session中获取用户id
-        String username = null;
-        // 获取请求中的所有cookie
-        Cookie[] cookies = request.getCookies();
-        // 判断是否有cookie
-        if (cookies != null) {
-            // 遍历所有cookie
-            for (Cookie cookie : cookies) {
-                // 判断是否是username的cookie
-                if ("username".equals(cookie.getName())) {
-                    // 获取cookie的值
-                    username = cookie.getValue();
-                    // 跳出循环
-                    break;
-                }
-            }
-        }
-        if (username != null) {
-            // 从cookie中获取到username，继续后续的操作
-            // 调用UserService的findUserByUsername方法，传入username，返回User对象
-            UserService userService = new UserService();
-            User user = userService.findUserByUsername(username);
-        }else {
-            // 没有找到用户，设置message属性为"用户不存在"
-            request.setAttribute("message", "用户不存在");
-        }
-        // 转发到profile.jsp页面
-        request.getRequestDispatcher("profile.jsp").forward(request, response);
-        // 从请求参数中获取个人信息字段
-        String name = request.getParameter("name");
-        String email = request.getParameter("email");
-        String phone = request.getParameter("phone");
-        String address = request.getParameter("address");
-
-        // 声明数据库连接和语句对象
+        // 定义数据库的连接，预编译语句和结果集对象
         Connection conn = null;
         PreparedStatement stmt = null;
+        ResultSet rs = null;
 
         try {
-            // 创建数据库连接
-            conn = DriverManager.getConnection(DB_URL);
-
-            // 创建预编译语句
-            stmt = conn.prepareStatement(UPDATE_QUERY);
-
-            // 设置个人信息参数
-            stmt.setString(1, name);
-            stmt.setString(2, email);
-            stmt.setString(3, phone);
-            stmt.setString(4, address);
-            // 设置用户id参数
-            stmt.setInt(5, username);
-
-            // 执行更新
-            int rows = stmt.executeUpdate();
-
-            // 检查更新是否成功
-            if (rows > 0) {
-                // 更新成功，设置message属性为"个人信息更新成功"
-                request.setAttribute("message", "个人信息更新成功");
-            } else {
-                // 更新失败，设置message属性为"个人信息更新失败"
-                request.setAttribute("message", "个人信息更新失败");
+            // 加载并注册MySQL的驱动类
+            // 获取数据库的连接对象
+            conn = DBUtil.getConnection();
+            // 创建一个预编译语句对象，传入SQL语句
+            stmt = conn.prepareStatement("select * from profile where username = ?");
+            // 从cookie中获取用户名的值
+            String username = null;
+            Cookie[] cookies = req.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if (cookie.getName().equals("username")) {
+                        username = cookie.getValue();
+                        break;
+                    }
+                }
             }
+            // 设置SQL语句的占位符的值，即用户名
+            stmt.setString(1, username);
+            // 执行SQL语句，返回一个结果集对象
+            rs = stmt.executeQuery();
+            // 使用一个列表来存储个人信息的对象
+            List<Info> infoList = new ArrayList<>();
 
-            // 重新设置个人信息的属性
-            request.setAttribute("name", name);
-            request.setAttribute("email", email);
-            request.setAttribute("phone", phone);
-            request.setAttribute("address", address);
-
-            // 转发请求到profile.jsp页面
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
-
-        } catch (SQLException e) {
-            // 处理SQL异常
+            // 遍历结果集，获取每一列的值，创建个人信息对象，添加到列表中
+            while (rs.next()) {
+                infoList.add(new Info("username", rs.getString("username")));
+                infoList.add(new Info("password", rs.getString("password")));
+                infoList.add(new Info("sex", rs.getString("sex")));
+                infoList.add(new Info("email", rs.getString("email")));
+                infoList.add(new Info("phone", rs.getString("phone")));
+                infoList.add(new Info("address", rs.getString("address")));
+            }
+            // 将列表设置为请求属性，传递给JSP页面
+            req.setAttribute("infoList", infoList);
+            // 转发请求到JSP页面
+            req.getRequestDispatcher("profile.jsp").forward(req, resp);
+        } catch (Exception e) {
+            // 处理异常
             e.printStackTrace();
         } finally {
-            // 关闭语句和连接对象
+            // 关闭资源
             try {
-                if (stmt != null) stmt.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

@@ -29,7 +29,7 @@ public class RegistServlet extends HttpServlet {
         String phone = request.getParameter("phone");
         String address = request.getParameter("address");
 // 创建用户对象
-        User user = new User(username, password, sex, email, phone, address);
+        User user = new User(username,password,email,sex,phone,address);
 
         // 创建数据访问对象
         UserDao userDao = new UserDao();

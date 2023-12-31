@@ -41,7 +41,7 @@ public class UserService {
                 String address = rs.getString("address");
 
                 // 创建并返回User对象
-                return new User(username, password, sex, email, phone, address);
+                return new User(username, password,sex,email,phone,address);
             }
 
             // 关闭结果集

@@ -11,6 +11,53 @@
 <html>
 <head>
   <title>个人信息</title>
+  <style>
+    .edit-input {
+      display: inline-block;
+      width: 150px;
+    }
+  </style>
+  <script>
+    function showInput(name, rowId) {
+      var valueTd = document.getElementById("value_" + rowId);
+      var inputHtml = "<input type='text' name='newValue' class='edit-input' value='" + valueTd.innerText.trim() + "'>";
+      valueTd.innerHTML = inputHtml;
+
+      var modifyLink = document.getElementById("modify_" + rowId);
+      modifyLink.style.display = "none";
+
+      var confirmLink = document.getElementById("confirm_" + rowId);
+      confirmLink.style.display = "inline-block";
+    }
+
+    function confirmEdit(name, rowId) {
+      var valueTd = document.getElementById("value_" + rowId);
+      var input = valueTd.getElementsByTagName("input")[0];
+      var newValue = input.value.trim();
+
+      if (newValue !== "") {
+        // 构造表单并提交
+        var form = document.createElement("form");
+        form.setAttribute("method", "POST");
+        form.setAttribute("action", "editServlet");
+
+        var nameInput = document.createElement("input");
+        nameInput.setAttribute("type", "hidden");
+        nameInput.setAttribute("name", "name");
+        nameInput.setAttribute("value", name);
+
+        var valueInput = document.createElement("input");
+        valueInput.setAttribute("type", "hidden");
+        valueInput.setAttribute("name", "value");
+        valueInput.setAttribute("value", newValue);
+
+        form.appendChild(nameInput);
+        form.appendChild(valueInput);
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+  </script>
 </head>
 <body>
 <h1>欢迎来到个人信息页面</h1>
@@ -18,55 +65,20 @@
 <c:if test="${not empty message}">
   <p>${message}</p>
 </c:if>
-<form action="profileServlet" method="post">
-  <table>
+<table>
+  <!-- 使用JSTL标签遍历个人信息列表 -->
+  <c:forEach var="info" items="${infoList}" varStatus="status">
     <tr>
-      <td>用户名：</td>
-      <td><input type="text" name="username" value="${username}" readonly></td>
-    </tr>
-    <tr>
-      <td>密码：</td>
-      <td><input type="password" name="password" value="${password}"></td>
-    </tr>
-    <tr>
-      <td>性别：</td>
+      <td>${info.name}</td>
+      <td id="value_${status.index}">${info.value}</td>
+      <!-- 每一项信息都有一个修改按钮，点击之后会将行转换为输入框 -->
       <td>
-        <c:choose>
-          <c:when test="${sex == '男'}">
-            <input type="radio" name="sex" value="男" checked>男
-            <input type="radio" name="sex" value="女">女
-          </c:when>
-          <c:when test="${sex == '女'}">
-            <input type="radio" name="sex" value="男">男
-            <input type="radio" name="sex" value="女" checked>女
-          </c:when>
-          <c:otherwise>
-            <input type="radio" name="sex" value="男">男
-            <input type="radio" name="sex" value="女">女
-          </c:otherwise>
-        </c:choose>
+        <a id="modify_${status.index}" href="javascript:showInput('${info.name}', ${status.index})">修改</a>
+        <a id="confirm_${status.index}" href="javascript:confirmEdit('${info.name}', ${status.index})" style="display: none;">确定</a>
       </td>
     </tr>
-    <tr>
-      <td>邮箱：</td>
-      <td><input type="text" name="email" value="${email}"></td>
-    </tr>
-    <tr>
-      <td>电话：</td>
-      <td><input type="text" name="phone" value="${phone}"></td>
-    </tr>
-    <tr>
-      <td>地址：</td>
-      <td><input type="text" name="address" value="${address}"></td>
-    </tr>
-    <tr>
-      <td colspan="2" align="center">
-        <input type="submit" value="修改">
-        <input type="reset" value="重置">
-      </td>
-    </tr>
-  </table>
-</form>
-<a href="product.jsp">返回商品页面</a>
+  </c:forEach>
+</table>
+<a href="product?action=browse">返回商品页面</a>
 </body>
 </html>
